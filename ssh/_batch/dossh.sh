@@ -8,7 +8,6 @@ SSH_USERNAME_HOST=${1}
 SSH_HOSTN=${1#*@}
 SSH_USERNAME=${1%%@*}
 SSH_LOGFILE="../log/sshconnect.log"
-#SSH_CONNPORTFILE="../_batch/openports"
 SSH_CONNECTUSER=$(tail -n 4 /var/log/auth.log | grep 'for user from' | awk '{print $11}')
 SSH_CONNECTUSER_UNDERLINE=$(echo ${SSH_CONNECTUSER} | tr '.' '_')
 SSH_COMMAND="${2} ${3} ${4} ${5} ${6}"
