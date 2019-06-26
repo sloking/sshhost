@@ -31,7 +31,10 @@ fi
 check_opencon () {
 
 	old_dir=$(pwd)
-	cd /home/user/.ssh/_batch/open_conn
+	if ! [[ -d ~/.ssh/_batch/open_conn  ]];then
+		mkdir ~/.ssh/_batch/open_conn
+	fi
+	cd ~/.ssh/_batch/open_conn
 	FILESTOREMOVE=""
 	for openfiles in $(ls)
 	do
