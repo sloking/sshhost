@@ -27,8 +27,7 @@ Set up your machine
 
 5. connect to an host with the new command 'sshh'
  - sshh root@host1
-
-  a) at first connecttion it will ask you for key creation
+ -- at first connection it will ask you for key creation
 
 6. in an other terminal look for logfile or openconnections
  - sshhostlog
