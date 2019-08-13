@@ -1,18 +1,18 @@
 # sshhost
 
-## What?!
+## Wait, What?!
 sshhost is an bash script for relay ssh connection over an specific host.
 This host do connect via ssh with keys and have for each other host an own key.
 So if you have 100 people and everyone will connect to 100 different host, you don't need to create 100*100 keys.
-Set up the following and you need **only one sshhost**
+Set up the following and you need **only one sshhost**.
 
 
 
 
 
-### Set up the host
+### Set up the sshhost host
 
-##### 1. Create a virtual Machine with an Linux like Ubuntu or so
+##### 1. Create a virtual Machine (or install native) with an Linux like Ubuntu or so
 ##### 2. Set static ip, set hostname (e.g. sshhost)
 ##### 3. Create a user with a strong password
 ##### 4. Copy the files in ssh to .ssh in user home
