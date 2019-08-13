@@ -1,6 +1,6 @@
 # sshhost
 
-Set up the host
+## Set up the host
 
 1. Create a virtual Machine with an Linux like Ubuntu or so
 2. Set static ip, set hostname (e.g. sshhost)
@@ -8,7 +8,7 @@ Set up the host
 4. Copy the files in ssh to .ssh in user home
 
 
-Set up your machine
+## Set up your machine
 
 1. create ssh keys for connection to sshhost
  - ssh-keygen -t rsa -b 4096
@@ -27,7 +27,7 @@ Set up your machine
 
 5. connect to an host with the new command 'sshh'
  - sshh root@host1
- -- at first connection it will ask you for key creation
+ ...at first connection it will ask you for key creation
 
 6. in an other terminal look for logfile or openconnections
  - sshhostlog
