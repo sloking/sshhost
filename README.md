@@ -27,13 +27,13 @@
 
 5. connect to an host with the new command 'sshh'
  - sshh root@host1
- ...at first connection it will ask you for key creation
+ ...at first connection it will ask you for key creation...
 
 6. in an other terminal look for logfile or openconnections
  - sshhostlog
  - sshhostopenconn
 
 
-Feel fre to inform me, when you find any mistakes or changes...
+Feel free to inform me, when you find any mistakes or changes...
 sloking@gmx.net
 
