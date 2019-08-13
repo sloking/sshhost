@@ -2,10 +2,10 @@
 
 ## Set up the host
 
-1. Create a virtual Machine with an Linux like Ubuntu or so
-2. Set static ip, set hostname (e.g. sshhost)
-3. Create a user with a strong password
-4. Copy the files in ssh to .ssh in user home
+##### 1. Create a virtual Machine with an Linux like Ubuntu or so
+##### 2. Set static ip, set hostname (e.g. sshhost)
+##### 3. Create a user with a strong password
+##### 4. Copy the files in ssh to .ssh in user home
 
 
 ## Set up your machine
