@@ -1,9 +1,16 @@
 #!/bin/bash
 #
-if ! [[ -d ~/.ssh/config/ ]];then
-	mkdir ~/.ssh/config/
+SSH_WORKDIR="${HOME}/.ssh"
+
+if ! [[ -d ${SSH_WORKDIR}/config/ ]];then
+        mkdir ${SSH_WORKDIR}/config/
 fi
-cd ~/.ssh/config/
+
+if ! [[ -d ${SSH_WORKDIR}/_batch/open_conn  ]];then
+        mkdir ${SSH_WORKDIR}/_batch/open_conn
+fi
+
+cd ${SSH_WORKDIR}/config/
 
 source ../_batch/log4bash.sh
 SSH_DATETIME=$(date +%s)
@@ -12,7 +19,7 @@ SSH_HOSTN=${1#*@}
 SSH_USERNAME=${1%%@*}
 SSH_LOGFILE="../log/sshconnect.log"
 #SSH_CONNPORTFILE="../_batch/openports"
-SSH_CONNECTUSER=$(tail -n 4 /var/log/auth.log | grep 'for user from' | awk '{print $11}')
+SSH_CONNECTUSER=$(tail -n 5 /var/log/auth.log | grep 'for user from' | awk '{print $11}')
 SSH_CONNECTUSER_UNDERLINE=$(echo ${SSH_CONNECTUSER} | tr '.' '_')
 SSH_COMMAND="${2} ${3} ${4} ${5} ${6}"
 SSH_BASHPID=${BASHPID}
@@ -30,15 +37,14 @@ elif [ ${#BASHPID} -eq 6 ];then
         SSH_BASHPID="${BASHPID}"
 fi
 
+
 #******************************************************************************************************
+
 
 check_opencon () {
 
 	old_dir=$(pwd)
-	if ! [[ -d ~/.ssh/_batch/open_conn  ]];then
-		mkdir ~/.ssh/_batch/open_conn
-	fi
-	cd ~/.ssh/_batch/open_conn
+	cd ${SSH_WORKDIR}/_batch/open_conn
 	FILESTOREMOVE=""
 	for openfiles in $(ls)
 	do
@@ -60,17 +66,18 @@ check_opencon () {
 		#echo "		cont1=" ${cont1_pid}
 		#echo "		cont2=" ${cont2_process}
 
+		#Datei ausgelesen, jetzt auswerten
 
 		if [[ -f /proc/${cont1_pid}/cmdline ]];then
-			#echo "    --->  ${PID1} is there  --------------------"
+			#echo "    --->  ${PID1} ist da  --------------------"
 			if [[ -z $(grep ${cont2_process} /proc/${cont1_pid}/cmdline) ]];then
-				#echo "    -------->  Prozess exist  --------------------"
+				#echo "    -------->  Prozess existiert  --------------------"
 			#else
-				echo "    -------->  Prozess don't exist"
+				echo "    -------->  Prozess existiert NICHT "
 				FILESTOREMOVE="${FILESTOREMOVE} ${openfiles}"
 			fi
 		else
-			#echo "    --->  ${PID1} is NOT there"
+			#echo "    --->  ${PID1} ist NICHT da"
 			FILESTOREMOVE="${FILESTOREMOVE} ${openfiles}"
 
 		fi
@@ -97,12 +104,12 @@ program_main () {
 
 log "" "" >> ${SSH_LOGFILE} 2>&1
 log "${SSH_BASHPID}" "*****************************************************" >> ${SSH_LOGFILE} 2>&1
-log "${SSH_BASHPID}" "Connection request from computer ${SSH_CONNECTUSER}, target: ${SSH_HOSTN} as user ${SSH_USERNAME}" >> ${SSH_LOGFILE} 2>&1
+log "${SSH_BASHPID}" "Verbindungsanfrage von Rechner ${SSH_CONNECTUSER}, Ziel: ${SSH_HOSTN} als user ${SSH_USERNAME}" >> ${SSH_LOGFILE} 2>&1
 
 
 if [[ "${SSH_USERNAME_HOST}" == "${SSH_USERNAME}" ]];then
-        echo "Wrong or no parameter given, sytax: sshh user@hostname"
-        log_error "${SSH_BASHPID}" "Wrong parameter" >> ${SSH_LOGFILE} 2>&1
+        echo "Falscher oder kein Parameter angegeben, Sytax: sshh user@hostname"
+        log_error "${SSH_BASHPID}" "Falscher Parameter" >> ${SSH_LOGFILE} 2>&1
         exit 1
 fi
 
@@ -115,52 +122,52 @@ if [ "${SSH_HOSTN}" ];then
 		echo "${SSH_USERNAME_HOST}" >> "../_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
 		#echo " ssh -i ~/.ssh/config/${SSH_FNAME%*.} ${SSH_USERNAME_HOST}"
 		if [[ "${SSH_COMMAND}" == "    " ]];then
-			log_success "${SSH_BASHPID}" "ssh key ${SSH_FNAME} exist, connecting..." >> ${SSH_LOGFILE} 2>&1
-			ssh -i ~/.ssh/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Conneection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
+			log_success "${SSH_BASHPID}" "SSL-Key ${SSH_FNAME} ist vorhanden, Verbindung wird hergestellt" >> ${SSH_LOGFILE} 2>&1
+			ssh -i ~/.ssh/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Verbindung beendet - von ${SSH_CONNECTUSER} nach ${SSH_USERNAME}@${SSH_HOSTN} - Dauer: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Verbindung beendet - von ${SSH_CONNECTUSER} nach ${SSH_USERNAME}@${SSH_HOSTN} - Dauer: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
 		else
-			log_success "${SSH_BASHPID}" "ssh key ${SSH_FNAME} exist, connecting with parameters" >> ${SSH_LOGFILE} 2>&1
-			ssh -i ~/.ssh/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} "${SSH_COMMAND}" && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
+			log_success "${SSH_BASHPID}" "SSL-Key ${SSH_FNAME} ist vorhanden, Verbindung wird hergestellt (mit Parameterübergabe)" >> ${SSH_LOGFILE} 2>&1
+			ssh -i ~/.ssh/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} "${SSH_COMMAND}" && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Verbindung beendet - von ${SSH_CONNECTUSER} nach ${SSH_USERNAME}@${SSH_HOSTN} - Dauer: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Verbindung beendet - von ${SSH_CONNECTUSER} nach ${SSH_USERNAME}@${SSH_HOSTN} - Dauer: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
 		fi
 		rm "../_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
 	else
-		log_warning "${SSH_BASHPID}" "ssh keys not exist! Asking for creation" >> ${SSH_LOGFILE} 2>&1
-		echo "-----> ssh keys for host '${SSH_HOSTN}' as user '${SSH_USERNAME}' don't exist!"
-		read -n 1 -p "-----> -----> create? [y/n] " SSH_QUEST
+		log_warning "${SSH_BASHPID}" "SSH Verbindung noch nicht vorhanden! Nachfrage nach Erstellung" >> ${SSH_LOGFILE} 2>&1
+		echo "-----> SSH Verbindung nach Host '${SSH_HOSTN}' als User '${SSH_USERNAME}' noch nicht vorhanden!"
+		read -n 1 -p "-----> -----> erstellen? [j/n] " SSH_QUEST
 		echo -e "\n"
-		if [ ! "${SSH_QUEST}" == "y" ] && [ ! "${SSH_QUEST}" == "n" ];then
-			log_error "${SSH_BASHPID}" "No correct answer given. Abort..." >> ${SSH_LOGFILE} 2>&1
+		if [ ! "${SSH_QUEST}" == "j" ] && [ ! "${SSH_QUEST}" == "n" ];then
+			log_error "${SSH_BASHPID}" "Keine gültige Antwort gegeben. Abbruch..." >> ${SSH_LOGFILE} 2>&1
 			#echo -e "\n"
-			echo "-----> -----> Please put in only 'y' or 'n' ! Abort..."
+			echo "-----> -----> Bitte nur j oder n eingeben ! Abbruch..."
 			echo -e "\n"
 			exit 1
 		else
-			if [ "${SSH_QUEST}" == "y" ];then
-				log "${SSH_BASHPID}" "ssh keys would be created and copied to the computer" >> ${SSH_LOGFILE} 2>&1
+			if [ "${SSH_QUEST}" == "j" ];then
+				log "${SSH_BASHPID}" "Nachfrage zugestimmt, SSL-Keys werden erzeugt und auf Rechner kopiert" >> ${SSH_LOGFILE} 2>&1
 				SSH_FNAME="id_rsa_${SSH_HOSTN}_${SSH_USERNAME}"
-				echo "-----> key creation"
+				echo "-----> Erzeugen der Keys"
 				ssh-keygen -t rsa -N "" -f "${SSH_FNAME}"
-				echo "-----> copy files to host ${SSH_HOSTN}"
+				echo "-----> Kopieren der Dateien auf den Host ${SSH_HOSTN}"
 
 				if [ "$(ssh-copy-id -i ~/.ssh/config/"${SSH_FNAME}".pub "${SSH_USERNAME_HOST}")" ]; then
-					log_success "${SSH_BASHPID}" "ssh keys copied" >> ${SSH_LOGFILE} 2>&1
+					log_success "${SSH_BASHPID}" "SSL-Keys wurden kopiert" >> ${SSH_LOGFILE} 2>&1
 					program_main
 				else
-					echo "-----> copy not succesful. Abort..."
-					log_error "${SSH_BASHPID}" "ssh keys NOT copied!" >> ${SSH_LOGFILE} 2>&1
+					echo "-----> Kopieren der Dateien fehlgeschlagen. Abbruch..."
+					log_error "${SSH_BASHPID}" "SSL-Keys wurden NICHT kopiert!" >> ${SSH_LOGFILE} 2>&1
 					rm ~/.ssh/config/"${SSH_FNAME}".pub
 					rm ~/.ssh/config/"${SSH_FNAME}"
-					log "${SSH_BASHPID}" "ssh keys removed" >> ${SSH_LOGFILE} 2>&1
+					log "${SSH_BASHPID}" "SSL-Keys gelöscht" >> ${SSH_LOGFILE} 2>&1
 				fi
 			else
-				log "${SSH_BASHPID}" "Question was not approved. Abort..." >> ${SSH_LOGFILE} 2>&1
-				echo "-----> Aborted..."
+				log "${SSH_BASHPID}" "Nachfrage wurde nicht zugestimmt. Abbruch..." >> ${SSH_LOGFILE} 2>&1
+				echo "-----> Abgebrochen..."
 				exit 1
 			fi
 		fi
 	fi
 else
-	echo "Wrong or no parameter given, sytax: sshh user@hostname"
-	log_error "${SSH_BASHPID}" "Wrong parameter" >> ${SSH_LOGFILE} 2>&1
+	echo "Falscher oder kein Parameter angegeben, Sytax: sshh user@hostname"
+	log_error "${SSH_BASHPID}" "Falscher Parameter" >> ${SSH_LOGFILE} 2>&1
 	exit 1
 fi
 }
