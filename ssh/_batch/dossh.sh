@@ -97,7 +97,7 @@ program_main () {
 
 log "" "" >> ${SSH_LOGFILE} 2>&1
 log "${SSH_BASHPID}" "*****************************************************" >> ${SSH_LOGFILE} 2>&1
-log "${SSH_BASHPID}" "Connection request from computer ${SSH_CONNECTUSER}, target: ${SSH_HOSTN} as user ${SSH_USERNAME}" >> ${SSH_LOGFILE} 2>&1
+log "${SSH_BASHPID}" "Connection request from host ${SSH_CONNECTUSER}, target: ${SSH_HOSTN} as user ${SSH_USERNAME}" >> ${SSH_LOGFILE} 2>&1
 
 
 if [[ "${SSH_USERNAME_HOST}" == "${SSH_USERNAME}" ]];then
@@ -135,7 +135,7 @@ if [ "${SSH_HOSTN}" ];then
 			exit 1
 		else
 			if [ "${SSH_QUEST}" == "y" ];then
-				log "${SSH_BASHPID}" "ssh keys would be created and copied to the computer" >> ${SSH_LOGFILE} 2>&1
+				log "${SSH_BASHPID}" "ssh keys would be created and copied to the host" >> ${SSH_LOGFILE} 2>&1
 				SSH_FNAME="id_rsa_${SSH_HOSTN}_${SSH_USERNAME}"
 				echo "-----> key creation"
 				ssh-keygen -t rsa -N "" -f "${SSH_FNAME}"
