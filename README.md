@@ -33,7 +33,7 @@ Set up the following and you need **only one sshhost**.
  - sshh='ssh -t -t -i ~/.ssh/id_rsa_sshhost user@sshhost "bash /home/user/.ssh/_batch/dossh.sh"'
  - sshhost='ssh -i ~/.ssh/id_rsa_sshhost root@sshhost'
  - sshhostlog='ssh -i ~/.ssh/id_rsa_sshhost root@sshhost tail -f -n 100 /home/user/.ssh/log/sshconnect.log'
- - sshhostopenconn='ssh -t -t -i ~/.ssh/config/id_rsa_sshhost root@sshhost bash /home/user/watch_dir.sh'
+ - sshhostopenconn='ssh -t -t -i ~/.ssh/config/id_rsa_sshhost root@sshhost bash /home/user/.ssh/_batch/watch_dir.sh'
 
 ##### 5. connect to an host with the new command 'sshh'
  - sshh root@host1
