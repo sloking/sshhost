@@ -28,7 +28,7 @@ Set up the following and you need **only one sshhost**.
 ##### 3. test it
  - ssh -i /home/myusername/.ssh/id_rsa_sshhost user@sshhost
 
-##### 4. create some aliases in file .bash_aliases or /etc/bash/bashrc or wathever you bash loaded
+##### 4. create some aliases in your own file .bash_aliases or /etc/bash/bashrc or wathever you bash loaded
  - sshh='ssh -t -t -i ~/.ssh/id_rsa_sshhost user@sshhost "bash /home/user/.ssh/_batch/dossh.sh"'
  - sshhost='ssh -i ~/.ssh/id_rsa_sshhost user@sshhost'
  - sshhostlog='ssh -i ~/.ssh/id_rsa_sshhost root@sshhost tail -f -n 100 /home/user/.ssh/log/sshconnect.log'
