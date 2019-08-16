@@ -2,10 +2,9 @@
 
 ## Wait, What?!
 sshhost is an bash script for relay ssh connection over an specific host.
-This host do connect via ssh with keys and have for each other host an own key.
+This host do the connection via ssh with keys and have for each host an own key.
 So if you have 100 people and everyone will connect to 100 different host, you don't need to create 100*100 keys.
 Set up the following and you need **only one sshhost**.
-
 
 
 
@@ -13,9 +12,9 @@ Set up the following and you need **only one sshhost**.
 ### Set up the sshhost host
 
 ##### 1. Create a virtual Machine (or install native) with an Linux like Ubuntu or so
-##### 2. Set static ip, set hostname (e.g. sshhost)
+##### 2. Set static ip, set hostname (in this case sshhost)
 ##### 3. Create a user with a strong password
-##### 4. Copy the files in ssh to .ssh in user home
+##### 4. Copy the folder/files in folder ssh to .ssh in users home directory
 
 
 ### Set up your machine
@@ -31,7 +30,7 @@ Set up the following and you need **only one sshhost**.
 
 ##### 4. create some aliases in file .bash_aliases or /etc/bash/bashrc or wathever you bash loaded
  - sshh='ssh -t -t -i ~/.ssh/id_rsa_sshhost user@sshhost "bash /home/user/.ssh/_batch/dossh.sh"'
- - sshhost='ssh -i ~/.ssh/id_rsa_sshhost root@sshhost'
+ - sshhost='ssh -i ~/.ssh/id_rsa_sshhost user@sshhost'
  - sshhostlog='ssh -i ~/.ssh/id_rsa_sshhost root@sshhost tail -f -n 100 /home/user/.ssh/log/sshconnect.log'
  - sshhostopenconn='ssh -t -t -i ~/.ssh/config/id_rsa_sshhost root@sshhost bash /home/user/.ssh/_batch/watch_dir.sh'
 
