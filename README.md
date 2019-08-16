@@ -20,7 +20,7 @@ Set up the following and you need **only one sshhost**.
 ### Set up your machine
 
 ##### 1. create ssh keys for connection to sshhost
- - ssh-keygen -t rsa -b 4096
+ - ssh-keygen -t rsa -N "" -f /home/myusername/.ssh/id_rsa_sshhost
 
 ##### 2. copy the key to sshhost
  - ssh-copy-id -i /home/myusername/.ssh/id_rsa_sshhost.pub user@sshhost
