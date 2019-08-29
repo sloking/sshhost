@@ -34,7 +34,7 @@ Set up the following and you need **only one sshhost**.
  - sshhostlog='ssh -i ~/.ssh/id_rsa_sshhost root@sshhost tail -f -n 100 /home/user/.ssh/log/sshconnect.log'
  - sshhostopenconn='ssh -t -t -i ~/.ssh/config/id_rsa_sshhost root@sshhost bash /home/user/.ssh/_batch/watch_dir.sh'
 
-##### 5. connect to an host with the new command 'sshh'
+##### 5. connect to a host with the new command 'sshh'
  - sshh root@host1
  
 at first connection it will ask you for key creation...
@@ -44,7 +44,7 @@ at first connection it will ask you for key creation...
  - sshhostopenconn
 
 
-Feel free to inform me, when you find any mistakes or changes...
+Feel free to inform me, when you find any mistakes or want changes...
 sloking@gmx.net
 
 If you want to use outputs and logs in german, rename file dossh_ger.sh to dossh.sh
