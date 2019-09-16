@@ -108,7 +108,7 @@ log "${SSH_BASHPID}" "Verbindungsanfrage von Rechner ${SSH_CONNECTUSER}, Ziel: $
 
 
 if [[ "${SSH_USERNAME_HOST}" == "${SSH_USERNAME}" ]];then
-        echo "Falscher oder kein Parameter angegeben, Sytax: sshh user@hostname"
+        echo "Falscher oder kein Parameter angegeben, Syntax: sshh user@hostname"
         log_error "${SSH_BASHPID}" "Falscher Parameter" >> ${SSH_LOGFILE} 2>&1
         exit 1
 fi
@@ -166,7 +166,7 @@ if [ "${SSH_HOSTN}" ];then
 		fi
 	fi
 else
-	echo "Falscher oder kein Parameter angegeben, Sytax: sshh user@hostname"
+	echo "Falscher oder kein Parameter angegeben, Syntax: sshh user@hostname"
 	log_error "${SSH_BASHPID}" "Falscher Parameter" >> ${SSH_LOGFILE} 2>&1
 	exit 1
 fi
