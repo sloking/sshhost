@@ -2,4 +2,4 @@
 
 TERM="xterm"
 
-watch "echo 'open ssh connections\n\n' && ls /home/user/.ssh/_batch/open_conn"
+watch "echo 'open ssh connections\n\n' && ls -rt /home/user/.ssh/_batch/open_conn"

@@ -10,9 +10,9 @@ SSH_DATETIME=$(date +%s)
 SSH_USERNAME_HOST=${1}
 SSH_HOSTN=${1#*@}
 SSH_USERNAME=${1%%@*}
-SSH_LOGFILE="../log/sshconnect.log"
+SSH_LOGFILE="/home/user/.ssh/log/sshconnect.log"
 #SSH_CONNPORTFILE="../_batch/openports"
-SSH_CONNECTUSER=$(tail -n 20 /var/log/auth.log | grep 'for user from' | tail -n1 | awk '{print $11}')
+SSH_CONNECTUSER=$(tail -n 10 /var/log/auth.log | grep 'Accepted publickey for user from' | tail -n1 | awk '{print $11}')
 SSH_CONNECTUSER_UNDERLINE=$(echo ${SSH_CONNECTUSER} | tr '.' '_')
 SSH_COMMAND="${2} ${3} ${4} ${5} ${6}"
 SSH_BASHPID=${BASHPID}
@@ -53,6 +53,9 @@ check_opencon () {
 				cont1_pid=${openfilesline}
 			else
 				cont2_process=${openfilesline}
+				file_user_host=$(echo $cont2_process | tr '@' '_')
+				file_ip=$(echo ${openfiles} | sed 's/_'"${file_user_host}"'//g' | sed 's/'"${cont1_pid}"'_//g' | tr '_' '.')
+				#echo $file_ip
 			fi
 
 		done < ${openfiles}
@@ -60,17 +63,29 @@ check_opencon () {
 		#echo "		cont1=" ${cont1_pid}
 		#echo "		cont2=" ${cont2_process}
 
+		if [ ${#cont1_pid} -eq 3 ];then
+		        cont1_pid_long="${cont1_pid}   "
+		elif [ ${#cont1_pid} -eq 4 ];then
+		        cont1_pid_long="${cont1_pid}  "
+		elif [ ${#cont1_pid} -eq 5 ];then
+		        cont1_pid_long="${cont1_pid} "
+		elif [ ${#cont1_pid} -eq 6 ];then
+		        cont1_pid_long="${cont1_pid}"
+		fi
 
 		if [[ -f /proc/${cont1_pid}/cmdline ]];then
 			#echo "    --->  ${PID1} is there  --------------------"
 			if [[ -z $(grep ${cont2_process} /proc/${cont1_pid}/cmdline) ]];then
 				#echo "    -------->  Prozess exist  --------------------"
 			#else
-				echo "    -------->  Prozess don't exist"
+
+				#echo "    -------->  Prozess don't exist"
+				log_error "${cont1_pid_long}" "Connection unexpected closed - from host ${file_ip} to ${cont2_process}" >> ${SSH_LOGFILE} 2>&1
 				FILESTOREMOVE="${FILESTOREMOVE} ${openfiles}"
 			fi
 		else
 			#echo "    --->  ${PID1} is NOT there"
+			log_error "${cont1_pid_long}" "Connection unexpected closed - from host ${file_ip} to ${cont2_process}" >> ${SSH_LOGFILE} 2>&1
 			FILESTOREMOVE="${FILESTOREMOVE} ${openfiles}"
 
 		fi
@@ -101,7 +116,7 @@ log "${SSH_BASHPID}" "Connection request from host ${SSH_CONNECTUSER}, target: $
 
 
 if [[ "${SSH_USERNAME_HOST}" == "${SSH_USERNAME}" ]];then
-        echo "Wrong or no parameter given, syntax: sshh user@hostname"
+        echo "Wrong or no parameter given, sytax: sshh user@hostname"
         log_error "${SSH_BASHPID}" "Wrong parameter" >> ${SSH_LOGFILE} 2>&1
         exit 1
 fi
@@ -159,7 +174,7 @@ if [ "${SSH_HOSTN}" ];then
 		fi
 	fi
 else
-	echo "Wrong or no parameter given, syntax: sshh user@hostname"
+	echo "Wrong or no parameter given, sytax: sshh user@hostname"
 	log_error "${SSH_BASHPID}" "Wrong parameter" >> ${SSH_LOGFILE} 2>&1
 	exit 1
 fi
