@@ -1,16 +1,23 @@
 #!/bin/bash
 #
-if ! [[ -d ~/.ssh/config/ ]];then
-	mkdir ~/.ssh/config/
-fi
-cd ~/.ssh/config/
+SSH_WORKDIR="${HOME}/.ssh"
 
-source ../_batch/log4bash.sh
+if ! [[ -d ${SSH_WORKDIR}/config/ ]];then
+        mkdir ${SSH_WORKDIR}/config/
+fi
+
+if ! [[ -d ${SSH_WORKDIR}/_batch/open_conn  ]];then
+        mkdir ${SSH_WORKDIR}/_batch/open_conn
+fi
+
+cd ${SSH_WORKDIR}/config/
+
+source ${SSH_WORKDIR}/_batch/log4bash.sh
 SSH_DATETIME=$(date +%s)
 SSH_USERNAME_HOST=${1}
 SSH_HOSTN=${1#*@}
 SSH_USERNAME=${1%%@*}
-SSH_LOGFILE="/home/user/.ssh/log/sshconnect.log"
+SSH_LOGFILE="${SSH_WORKDIR}/log/sshconnect.log"
 #SSH_CONNPORTFILE="../_batch/openports"
 SSH_CONNECTUSER=$(tail -n 10 /var/log/auth.log | grep 'Accepted publickey for user from' | tail -n1 | awk '{print $11}')
 SSH_CONNECTUSER_UNDERLINE=$(echo ${SSH_CONNECTUSER} | tr '.' '_')
@@ -35,10 +42,10 @@ fi
 check_opencon () {
 
 	old_dir=$(pwd)
-	if ! [[ -d ~/.ssh/_batch/open_conn  ]];then
-		mkdir ~/.ssh/_batch/open_conn
+	if ! [[ -d ${SSH_WORKDIR}/_batch/open_conn  ]];then
+		mkdir ${SSH_WORKDIR}/_batch/open_conn
 	fi
-	cd ~/.ssh/_batch/open_conn
+	cd ${SSH_WORKDIR}/_batch/open_conn
 	FILESTOREMOVE=""
 	for openfiles in $(ls)
 	do
@@ -125,16 +132,16 @@ if [ "${SSH_HOSTN}" ];then
 	#echo "${SSH_HOSTN}_${SSH_USERNAME}"
 	SSH_FNAME="$(ls | grep -i ${SSH_HOSTN}_${SSH_USERNAME} | head -n 1)"
 	if [ ! -z "${SSH_FNAME}" ] ;then
-		touch "../_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
-		echo "${SHORT_BASHPID}" > "../_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
-		echo "${SSH_USERNAME_HOST}" >> "../_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
+		touch "${SSH_WORKDIR}/_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
+		echo "${SHORT_BASHPID}" > "${SSH_WORKDIR}/_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
+		echo "${SSH_USERNAME_HOST}" >> "${SSH_WORKDIR}/_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
 		#echo " ssh -i ~/.ssh/config/${SSH_FNAME%*.} ${SSH_USERNAME_HOST}"
 		if [[ "${SSH_COMMAND}" == "    " ]];then
 			log_success "${SSH_BASHPID}" "ssh key ${SSH_FNAME} exist, connecting..." >> ${SSH_LOGFILE} 2>&1
-			ssh -i ~/.ssh/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Conneection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
+			ssh -i ${SSH_WORKDIR}/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Conneection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
 		else
 			log_success "${SSH_BASHPID}" "ssh key ${SSH_FNAME} exist, connecting with parameters" >> ${SSH_LOGFILE} 2>&1
-			ssh -i ~/.ssh/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} "${SSH_COMMAND}" && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
+			ssh -i ${SSH_WORKDIR}/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} "${SSH_COMMAND}" && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
 		fi
 		rm "../_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
 	else
@@ -156,14 +163,14 @@ if [ "${SSH_HOSTN}" ];then
 				ssh-keygen -t rsa -N "" -f "${SSH_FNAME}"
 				echo "-----> copy files to host ${SSH_HOSTN}"
 
-				if [ "$(ssh-copy-id -i ~/.ssh/config/"${SSH_FNAME}".pub "${SSH_USERNAME_HOST}")" ]; then
+				if [ "$(ssh-copy-id -i ${SSH_WORKDIR}/config/"${SSH_FNAME}".pub "${SSH_USERNAME_HOST}")" ]; then
 					log_success "${SSH_BASHPID}" "ssh keys copied" >> ${SSH_LOGFILE} 2>&1
 					program_main
 				else
 					echo "-----> copy not succesful. Abort..."
 					log_error "${SSH_BASHPID}" "ssh keys NOT copied!" >> ${SSH_LOGFILE} 2>&1
-					rm ~/.ssh/config/"${SSH_FNAME}".pub
-					rm ~/.ssh/config/"${SSH_FNAME}"
+					rm ${SSH_WORKDIR}/config/"${SSH_FNAME}".pub
+					rm ${SSH_WORKDIR}/config/"${SSH_FNAME}"
 					log "${SSH_BASHPID}" "ssh keys removed" >> ${SSH_LOGFILE} 2>&1
 				fi
 			else
