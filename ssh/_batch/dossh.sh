@@ -1,5 +1,6 @@
 #!/bin/bash
 #
+
 SSH_WORKDIR="${HOME}/.ssh"
 
 if ! [[ -d ${SSH_WORKDIR}/config/ ]];then
@@ -12,13 +13,14 @@ fi
 
 cd ${SSH_WORKDIR}/config/
 
+
 source ${SSH_WORKDIR}/_batch/log4bash.sh
 SSH_DATETIME=$(date +%s)
 SSH_USERNAME_HOST=${1}
 SSH_HOSTN=${1#*@}
 SSH_USERNAME=${1%%@*}
 SSH_LOGFILE="${SSH_WORKDIR}/log/sshconnect.log"
-#SSH_CONNPORTFILE="../_batch/openports"
+#SSH_CONNPORTFILE="${SSH_WORKDIR}/_batch/openports"
 SSH_CONNECTUSER=$(tail -n 10 /var/log/auth.log | grep 'Accepted publickey for user from' | tail -n1 | awk '{print $11}')
 SSH_CONNECTUSER_UNDERLINE=$(echo ${SSH_CONNECTUSER} | tr '.' '_')
 SSH_COMMAND="${2} ${3} ${4} ${5} ${6}"
@@ -39,7 +41,8 @@ fi
 
 #******************************************************************************************************
 
-check_opencon () {
+check_opencon()
+{
 
 	old_dir=$(pwd)
 	if ! [[ -d ${SSH_WORKDIR}/_batch/open_conn  ]];then
@@ -113,9 +116,86 @@ check_opencon () {
 
 #******************************************************************************************************
 
+check_params()
+{
+
+if [[ "${SSH_USERNAME_HOST}" == "--help" ]];then
+	params=1
+	print_help
+
+elif [[ "${SSH_USERNAME_HOST}" == "--rmkey" ]];then
+	params=1
+	KEY_TO_DEL=${SSH_COMMAND}
+	#echo ${KEY_TO_DEL}
+	if ! [[ $(echo ${KEY_TO_DEL} | grep -E '\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z0-9.-]\b') ]];then
+		echo "! Wrong parameter given!"
+		print_help
+	else
+		SSH_HOSTN_FILE=${KEY_TO_DEL#*@}
+		SSH_HOSTN_FILE=$(echo ${SSH_HOSTN_FILE} | sed 's/ //g')
+		#echo "hostname ${SSH_HOSTN_FILE}"
+		SSH_USERNAME_FILE=${KEY_TO_DEL%@*}
+		#echo "user ${SSH_USERNAME_FILE}"
+		FILE_TO_DELETE="id_rsa_${SSH_HOSTN_FILE}_${SSH_USERNAME_FILE}"
+		FILE_TO_DELETE2="id_rsa_${SSH_HOSTN_FILE}_${SSH_USERNAME_FILE}.pub"
+		#echo -e "Delete ${FILE_TO_DELETE}"
+
+		ALL_KEYS=$(ls)
+		FILE_FOUND=0
+		for ALL_KEY in ${ALL_KEYS}
+		do
+			if [[ "${ALL_KEY}" == "${FILE_TO_DELETE}" ]];then
+				echo ${ALL_KEY}
+				FILE_FOUND=1
+			fi
+		done
+
+                if [[ ${FILE_FOUND} -eq 0 ]];then
+                        echo -e "\nNo ssh-key found for \"${SSH_USERNAME_FILE}@${SSH_HOSTN_FILE}\" - file \"${FILE_TO_DELETE}\" not found! Abort...\n"
+                        log_error "${SSH_BASHPID}" "Try to delete Keys in the config folder: \"${FILE_TO_DELETE}\" - file NOT found - request from ${SSH_CONNECTUSER}" >> ${SSH_LOGFILE} 2>&1
+                else
+                        echo -e "\nDelete \"${FILE_TO_DELETE}\" and \"${FILE_TO_DELETE2}\""
+                        log_warning "${SSH_BASHPID}" "Delete Keys in the config folder: \"${FILE_TO_DELETE}\" - request from ${SSH_CONNECTUSER}" >> ${SSH_LOGFILE} 2>&1
+                        rm -v ${FILE_TO_DELETE}
+                        rm -v ${FILE_TO_DELETE2}
+                fi
+	fi
+
+elif [[ "${SSH_USERNAME_HOST}" == "--rmid" ]];then
+	params=1
+	#ID_TO_DEL${SSH_COMMAND}
+	KEY_TO_DEL=${SSH_COMMAND}
+	SSH_HOSTN_FILE=${KEY_TO_DEL#*@}
+        SSH_HOSTN_FILE=$(echo ${SSH_HOSTN_FILE} | sed 's/ //g')
+	KNOWN_HOSTS_FILE=${SSH_WORKDIR}/known_hosts
+	echo -e "\nDelete host \"${SSH_HOSTN_FILE}\" from file \"${KNOWN_HOSTS_FILE}\""
+	log_warning "${SSH_BASHPID}" "Delete host \"${SSH_HOSTN_FILE}\" in the known_hosts file - request from ${SSH_CONNECTUSER}" >> ${SSH_LOGFILE} 2>&1
+	ssh-keygen -f ${KNOWN_HOSTS_FILE} -R ${SSH_HOSTN_FILE}
+
+elif [[ "${SSH_USERNAME_HOST}" =~ "--" ]];then
+	params=1
+	echo "! Wrong parameter given!"
+        print_help
+fi
+
+}
+
+print_help()
+{
+
+echo -e "\n ----  SSHHOST little manual ----"
+echo -e "\n --help			-	Show this help"
+echo -e " --rmkey user@hostname	-	Remove sshkey"
+echo -e " --rmid hostname	-	Remove host from known-hosts"
+echo -e "\n"
+
+}
+
+#******************************************************************************************************
 
 
-program_main () {
+program_main()
+{
 
 log "" "" >> ${SSH_LOGFILE} 2>&1
 log "${SSH_BASHPID}" "*****************************************************" >> ${SSH_LOGFILE} 2>&1
@@ -135,7 +215,7 @@ if [ "${SSH_HOSTN}" ];then
 		touch "${SSH_WORKDIR}/_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
 		echo "${SHORT_BASHPID}" > "${SSH_WORKDIR}/_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
 		echo "${SSH_USERNAME_HOST}" >> "${SSH_WORKDIR}/_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
-		#echo " ssh -i ~/.ssh/config/${SSH_FNAME%*.} ${SSH_USERNAME_HOST}"
+		#echo " ssh -i ${SSH_WORKDIR}/config/${SSH_FNAME%*.} ${SSH_USERNAME_HOST}"
 		if [[ "${SSH_COMMAND}" == "    " ]];then
 			log_success "${SSH_BASHPID}" "ssh key ${SSH_FNAME} exist, connecting..." >> ${SSH_LOGFILE} 2>&1
 			ssh -i ${SSH_WORKDIR}/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Conneection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
@@ -143,7 +223,7 @@ if [ "${SSH_HOSTN}" ];then
 			log_success "${SSH_BASHPID}" "ssh key ${SSH_FNAME} exist, connecting with parameters" >> ${SSH_LOGFILE} 2>&1
 			ssh -i ${SSH_WORKDIR}/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} "${SSH_COMMAND}" && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
 		fi
-		rm "../_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
+		rm "${SSH_WORKDIR}/_batch/open_conn/${SHORT_BASHPID}_${SSH_CONNECTUSER_UNDERLINE}_${SSH_USERNAME}_${SSH_HOSTN}"
 	else
 		log_warning "${SSH_BASHPID}" "ssh keys not exist! Asking for creation" >> ${SSH_LOGFILE} 2>&1
 		echo "-----> ssh keys for host '${SSH_HOSTN}' as user '${SSH_USERNAME}' don't exist!"
@@ -151,8 +231,8 @@ if [ "${SSH_HOSTN}" ];then
 		echo -e "\n"
 		if [ ! "${SSH_QUEST}" == "y" ] && [ ! "${SSH_QUEST}" == "n" ];then
 			log_error "${SSH_BASHPID}" "No correct answer given. Abort..." >> ${SSH_LOGFILE} 2>&1
-			#echo -e "\n"
-			echo "-----> -----> Please put in only 'y' or 'n' ! Abort..."
+			echo -e "\n"
+			echo "-----> -----> Please press only 'y' or 'n' ! Abort..."
 			echo -e "\n"
 			exit 1
 		else
@@ -185,6 +265,7 @@ else
 	log_error "${SSH_BASHPID}" "Wrong parameter" >> ${SSH_LOGFILE} 2>&1
 	exit 1
 fi
+
 }
 
 sec_to_time() {
@@ -210,4 +291,7 @@ sec_to_time() {
 
 
 check_opencon
-program_main
+check_params
+if [[ ${params} -eq 0 ]];then
+	program_main
+fi
