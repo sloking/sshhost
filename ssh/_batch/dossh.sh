@@ -183,8 +183,9 @@ fi
 print_help()
 {
 
-echo -e "\n ----  SSHHOST little manual ----"
-echo -e "\n --help			-	Show this help"
+echo -e "\n ----  SSHHOST little manual - supported parameters ----"
+echo -e "\n user@hostname		-	Connects to a host"
+echo -e " --help			-	Show this help"
 echo -e " --rmkey user@hostname	-	Remove sshkey"
 echo -e " --rmid hostname	-	Remove host from known-hosts"
 echo -e "\n"
@@ -204,6 +205,7 @@ log "${SSH_BASHPID}" "Connection request from host ${SSH_CONNECTUSER}, target: $
 
 if [[ "${SSH_USERNAME_HOST}" == "${SSH_USERNAME}" ]];then
         echo "Wrong or no parameter given, sytax: sshh user@hostname"
+	print_help
         log_error "${SSH_BASHPID}" "Wrong parameter" >> ${SSH_LOGFILE} 2>&1
         exit 1
 fi
@@ -262,6 +264,7 @@ if [ "${SSH_HOSTN}" ];then
 	fi
 else
 	echo "Wrong or no parameter given, sytax: sshh user@hostname"
+	print_help
 	log_error "${SSH_BASHPID}" "Wrong parameter" >> ${SSH_LOGFILE} 2>&1
 	exit 1
 fi
