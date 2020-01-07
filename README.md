@@ -3,7 +3,7 @@
 ## Wait, What?!
 sshhost is an bash script for relay ssh connection over an specific host.
 This host do the connection via ssh with keys and have for each host an own key.
-So if you have 100 people and everyone will connect to 100 different host, you don't need to create 100*100 keys.
+So if you have 100 people and everyone will connect to 100 different hosts, you don't need to create 100*100 keys.
 Set up the following and you need **only one sshhost**.
 
 
@@ -13,9 +13,10 @@ Set up the following and you need **only one sshhost**.
 
 ##### 1. Create a virtual Machine (or install native) with an Linux like Ubuntu or so
 ##### 2. Set static ip, set hostname (in this case sshhost)
-######       - be sure, the file /etc/ssh/sshd_config contains "SyslogFacility AUTH" and "LogLevel INFO"
+- be sure, the file /etc/ssh/sshd_config contains "SyslogFacility AUTH" and "LogLevel INFO"
 ##### 3. Create a user with a strong password
 ##### 4. Copy the folder/files in folder ssh to .ssh in users home directory
+
 
 
 ### Set up your machine
