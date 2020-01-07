@@ -13,7 +13,7 @@ Set up the following and you need **only one sshhost**.
 
 ##### 1. Create a virtual Machine (or install native) with an Linux like Ubuntu or so
 ##### 2. Set static ip, set hostname (in this case sshhost)
-###### - be sure, the file /etc/ssh/sshd_config contains "SyslogFacility AUTH" and "LogLevel INFO"
+######       - be sure, the file /etc/ssh/sshd_config contains "SyslogFacility AUTH" and "LogLevel INFO"
 ##### 3. Create a user with a strong password
 ##### 4. Copy the folder/files in folder ssh to .ssh in users home directory
 
