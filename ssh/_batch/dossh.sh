@@ -90,7 +90,7 @@ check_opencon()
 			#else
 
 				#echo "    -------->  Prozess don't exist"
-				log_error "${cont1_pid_long}" "Connection unexpected closed - from host ${file_ip} to ${cont2_process}" >> ${SSH_LOGFILE} 2>&1
+				log_error "${cont1_pid_long}" "Connection unexpectly closed - from host ${file_ip} to ${cont2_process}" >> ${SSH_LOGFILE} 2>&1
 				FILESTOREMOVE="${FILESTOREMOVE} ${openfiles}"
 			fi
 		else
@@ -220,7 +220,7 @@ if [ "${SSH_HOSTN}" ];then
 		#echo " ssh -i ${SSH_WORKDIR}/config/${SSH_FNAME%*.} ${SSH_USERNAME_HOST}"
 		if [[ "${SSH_COMMAND}" == "    " ]];then
 			log_success "${SSH_BASHPID}" "ssh key ${SSH_FNAME} exist, connecting..." >> ${SSH_LOGFILE} 2>&1
-			ssh -i ${SSH_WORKDIR}/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Conneection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
+			ssh -i ${SSH_WORKDIR}/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
 		else
 			log_success "${SSH_BASHPID}" "ssh key ${SSH_FNAME} exist, connecting with parameters" >> ${SSH_LOGFILE} 2>&1
 			ssh -i ${SSH_WORKDIR}/config/"${SSH_FNAME%*.}" ${SSH_USERNAME_HOST} "${SSH_COMMAND}" && $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1) || $(NOW=$(date +%s); log "${SSH_BASHPID}" "Connection closed - from ${SSH_CONNECTUSER} to ${SSH_USERNAME}@${SSH_HOSTN} - duration: $(sec_to_time NOW SSH_DATETIME)" >> ${SSH_LOGFILE} 2>&1)
@@ -249,7 +249,7 @@ if [ "${SSH_HOSTN}" ];then
 					log_success "${SSH_BASHPID}" "ssh keys copied" >> ${SSH_LOGFILE} 2>&1
 					program_main
 				else
-					echo "-----> copy not succesful. Abort..."
+					echo "-----> copy not successful. Abort..."
 					log_error "${SSH_BASHPID}" "ssh keys NOT copied!" >> ${SSH_LOGFILE} 2>&1
 					rm ${SSH_WORKDIR}/config/"${SSH_FNAME}".pub
 					rm ${SSH_WORKDIR}/config/"${SSH_FNAME}"
